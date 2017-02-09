@@ -32,7 +32,7 @@ class FileSystem extends AbstractStorage
      * @param  array  $data
      * @return boolean
      */
-    public function saveTable($table, array $data)
+    public function saveTable($table, array &$data)
     {
         $file = $this->path . '/' . $table . '.json';
         $data = $this->touchModified($data);

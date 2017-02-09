@@ -56,6 +56,20 @@ class FiltersTest extends TestCase
     }
 
     /**
+    * @covers ::testNotEqualStrict
+    */
+    public function testNotEqualStrict()
+    {
+        $this->assertTrue(
+            $this->filter->match('!==', true, '123', 123)
+        );
+
+        $this->assertFalse(
+            $this->filter->match('!==', true, 123, 123)
+        );
+    }
+
+    /**
     * @covers ::testLower
     */
     public function testLower()
@@ -213,4 +227,67 @@ class FiltersTest extends TestCase
         );
     }
 
+    /**
+    * @covers ::testArrayHas
+    */
+    public function testArrayHas()
+    {
+        $this->assertTrue(
+            $this->filter->match('array_has', true, ['hello', 'world'], 'hello')
+        );
+
+        $this->assertFalse(
+            $this->filter->match('array_has', true, ['hello', 'world'], 'foo')
+        );
+
+        $this->assertFalse(
+            $this->filter->match('array_has', true, 'hello', 'foo')
+        );
+    }
+
+    /**
+    * @covers ::testArrayHas
+    */
+    public function testArrayHasNot()
+    {
+        $this->assertTrue(
+            $this->filter->match('!array_has', true, ['hello', 'world'], 'foo')
+        );
+
+        $this->assertTrue(
+            $this->filter->match('!array_has', true, 'nada', 'foo')
+        );
+
+        $this->assertFalse(
+            $this->filter->match('!array_has', true, ['hello', 'world'], 'hello')
+        );
+    }
+
+    /**
+    * @covers ::testHasColumn
+    */
+    public function testHasColumn()
+    {
+        $this->assertTrue(
+            $this->filter->match('has_col', true, null, null)
+        );
+
+        $this->assertFalse(
+            $this->filter->match('has_col', false, null, null)
+        );
+    }
+
+    /**
+    * @covers ::testHasNotColumn
+    */
+    public function testHasNotColumn()
+    {
+        $this->assertTrue(
+            $this->filter->match('!has_col', false, null, null)
+        );
+
+        $this->assertFalse(
+            $this->filter->match('!has_col', true, null, null)
+        );
+    }
 }

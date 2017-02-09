@@ -17,7 +17,7 @@ abstract class AbstractStorage
      * @param  array  $data
      * @return boolean
      */
-    abstract public function saveTable($table, array $data);
+    abstract public function saveTable($table, array &$data);
 
     /**
      * Get a blank table

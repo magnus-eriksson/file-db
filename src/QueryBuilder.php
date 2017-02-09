@@ -262,6 +262,86 @@ class QueryBuilder
 
 
     /**
+     * Value must exist in sub array
+     *
+     * @param  string $column   Column to search
+     * @param  mixed  $value
+     * @return $this
+     */
+    public function arrayHas($column, $value)
+    {
+        $this->where[] = [$column, 'array_has', $value];
+        return $this;
+    }
+
+
+    /**
+     * Value must not exist in sub array
+     *
+     * @param  string $column   Column to search
+     * @param  mixed  $value
+     * @return $this
+     */
+    public function arrayHasNot($column, $value)
+    {
+        $this->where[] = [$column, '!array_has', $value];
+        return $this;
+    }
+
+
+    /**
+     * Value must not be null
+     *
+     * @param  string $column
+     * @return $this
+     */
+    public function isNull($column)
+    {
+        $this->where[] = [$column, '===', null];
+        return $this;
+    }
+
+
+    /**
+     * Value must be null
+     *
+     * @param  string $column
+     * @return $this
+     */
+    public function notNull($column)
+    {
+        $this->where[] = [$column, '!==', null];
+        return $this;
+    }
+
+
+    /**
+     * Column must exist
+     *
+     * @param  string $column
+     * @return $this
+     */
+    public function hasColumn($column)
+    {
+        $this->where[] = [$column, 'has_col', null];
+        return $this;
+    }
+
+
+    /**
+     * Column must not exist
+     *
+     * @param  string $column
+     * @return $this
+     */
+    public function hasNotColumn($column)
+    {
+        $this->where[] = [$column, '!has_col', null];
+        return $this;
+    }
+
+
+    /**
      * Match an item with the where conditions
      *
      * @return boolean

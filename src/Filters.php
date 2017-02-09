@@ -3,21 +3,26 @@
 class Filters
 {
     protected $operators = [
-        '='     => 'equal',
-        '==='   => 'equal_strict',
-        '!='    => 'not_equal',
-        '<>'    => 'not_equal',
-        '<'     => 'lower',
-        '>'     => 'higher',
-        '<='    => 'lower_or_equal',
-        '>='    => 'higher_or_equal',
-        '*'     => 'contains',
-        '=*'    => 'starts_with',
-        '*='    => 'ends_with',
-        'in'    => 'in_list',
-        '!in'   => 'not_in_list',
-        'regex' => 'regex',
-        'func'  => 'callback',
+        '='          => 'equal',
+        '==='        => 'equalStrict',
+        '!=='        => 'notEqualStrict',
+        '!='         => 'notEqual',
+        '<>'         => 'notEqual',
+        '<'          => 'lower',
+        '>'          => 'higher',
+        '<='         => 'lowerOrEqual',
+        '>='         => 'higherOrEqual',
+        '*'          => 'contains',
+        '=*'         => 'startsWith',
+        '*='         => 'endsWith',
+        'in'         => 'inList',
+        '!in'        => 'notInList',
+        'regex'      => 'regex',
+        'func'       => 'callback',
+        'array_has'  => 'arrayHas',
+        '!array_has' => 'arrayHasNot',
+        'has_col'    => 'hasColumn',
+        '!has_col'   => 'hasNotColumn',
     ];
 
     public function match($op, $found, $real, $test)
@@ -26,11 +31,13 @@ class Filters
             return false;
         }
 
-        $op = str_replace('_', ' ', $this->operators[$op]);
-        $op = ucwords($op);
-        $op = str_replace(' ', '', $op);
+        $testName = "test{$this->operators[$op]}";
 
-        return call_user_func_array([$this, "test{$op}"], [$found, $real, $test]);
+        if (!method_exists($this, $testName)) {
+            return false;
+        }
+
+        return call_user_func_array([$this, $testName], [$found, $real, $test]);
     }
 
     public function testEqual($found, $real, $test)
@@ -46,6 +53,11 @@ class Filters
     public function testNotEqual($found, $real, $test)
     {
         return !$found || $real != $test;
+    }
+
+    public function testNotEqualStrict($found, $real, $test)
+    {
+        return !$found || $real !== $test;
     }
 
     public function testLower($found, $real, $test)
@@ -101,5 +113,25 @@ class Filters
     public function testRegex($found, $real, $test)
     {
         return (bool) preg_match($test, $real);
+    }
+
+    public function testArrayHas($found, $real, $test)
+    {
+        return $found && is_array($real) && in_array($test, $real);
+    }
+
+    public function testArrayHasNot($found, $real, $test)
+    {
+        return !$found || !is_array($real) || !in_array($test, $real);
+    }
+
+    public function testHasColumn($found)
+    {
+        return $found;
+    }
+
+    public function testHasNotColumn($found)
+    {
+        return !$found;
     }
 }
