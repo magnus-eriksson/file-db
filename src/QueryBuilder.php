@@ -17,6 +17,12 @@ class QueryBuilder
      */
     protected $filters;
 
+    /**
+     * Return type
+     * @var string
+     */
+    protected $returnAs = 'array';
+
 
     /**
      * @param Table $table
@@ -26,6 +32,7 @@ class QueryBuilder
         $this->table   = $table;
         $this->filters = $filters;
     }
+
 
     /**
      * Get a meta value
@@ -37,6 +44,7 @@ class QueryBuilder
     {
         return $this->table->data['meta'][$key] ?? null;
     }
+
 
     /**
      * Insert a new record
@@ -53,6 +61,7 @@ class QueryBuilder
         return $data['id'];
     }
 
+
     /**
      * Batch insert multiple records
      *
@@ -68,6 +77,7 @@ class QueryBuilder
 
         return $ids;
     }
+
 
     /**
      * Update records
@@ -91,6 +101,7 @@ class QueryBuilder
 
         return $affected;
     }
+
 
     /**
      * Replace records
@@ -116,6 +127,7 @@ class QueryBuilder
         return $affected;
     }
 
+
     /**
      * Delete records
      *
@@ -138,6 +150,7 @@ class QueryBuilder
         return $affected;
     }
 
+
     /**
      * Truncate a table
      * @return boolean
@@ -148,6 +161,23 @@ class QueryBuilder
         return $this->table->save();
     }
 
+
+    /**
+     * Return results as object
+     *
+     * @param  string $class
+     * @return $this
+     */
+    public function asObj($class = 'stdClass')
+    {
+        $this->returnAs = strtolower($class) == 'stdclass' || strtolower($class) == 'array'
+            ? strtolower($class)
+            : '\\' . ltrim($class, '\\');
+
+        return $this;
+    }
+
+
     /**
      * Get records
      *
@@ -155,28 +185,32 @@ class QueryBuilder
      */
     public function get()
     {
-        if (!$this->where) {
-            return array_values($this->table->data['data']);
-        }
-
         $list = [];
         foreach ($this->table->data['data'] as $rs) {
+            if (!$this->where) {
+                $list[] = $this->convertItem($rs);
+                continue;
+            }
+
             if ($this->matchWhere($rs)) {
-                $list[] = $rs;
+                $list[] = $this->convertItem($rs);
             }
         }
 
         return $list;
     }
 
+
     /**
      * Get the number of results the current query returns
+     *
      * @return integer
      */
     public function count()
     {
         return count($this->get());
     }
+
 
     /**
      * Get first record
@@ -186,17 +220,20 @@ class QueryBuilder
     public function first()
     {
         if (!$this->where) {
-            return $this->data['data'] ? reset($this->data['data']) : null;
+            return $this->data['data']
+                ? $this->convertItem(reset($this->data['data']))
+                : null;
         }
 
         foreach ($this->table->data['data'] as $rs) {
             if ($this->matchWhere($rs)) {
-                return $rs;
+                return $this->convertItem($rs);
             }
         }
 
         return null;
     }
+
 
     /**
      * Find a record (short for ->where('id', $id)->first())
@@ -212,6 +249,7 @@ class QueryBuilder
 
         return $this->first();
     }
+
 
     /**
      * Value must exist in the array
@@ -236,6 +274,7 @@ class QueryBuilder
         return $this;
     }
 
+
     /**
      * Value must be in list
      *
@@ -247,6 +286,7 @@ class QueryBuilder
     {
         return $this->where($column, 'in', $values);
     }
+
 
     /**
      * Value must not be in list
@@ -338,6 +378,26 @@ class QueryBuilder
     {
         $this->where[] = [$column, '!has_col', null];
         return $this;
+    }
+
+
+    /**
+     * Convert a record set
+     *
+     * @param  array $rs
+     * @return mixed
+     */
+    protected function convertItem($rs)
+    {
+        if ('array' == $this->returnAs) {
+            return $rs;
+        }
+
+        if ('stdclass' == $this->returnAs) {
+            return (object) $rs;
+        }
+
+        return new $this->returnAs($rs);
     }
 
 

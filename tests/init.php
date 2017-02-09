@@ -17,3 +17,27 @@ function db($table)
     }
     return $db->table($table);
 }
+
+/**
+ * Data object
+ */
+class DataObject
+{
+    protected $name;
+    protected $number;
+    protected $empty;
+    protected $list = [];
+
+    public function __construct(array $array)
+    {
+        foreach ($array as $key => $value) {
+            $this->{$key} = $value;
+        }
+    }
+
+    public function __get($prop)
+    {
+        return $this->{$prop};
+    }
+
+}

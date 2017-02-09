@@ -232,6 +232,29 @@ class QueryBuilderTest extends TestCase
     }
 
     /**
+    * @covers ::asObj
+    */
+    public function testAsObj()
+    {
+        $ids = $this->reset();
+
+        $result = db('test')
+            ->asObj()
+            ->find('foo', 'name');
+
+        $this->assertInternalType('object', $result);
+        $this->assertEquals('foo', $result->name);
+
+        $result = db('test')
+            ->asObj('DataObject')
+            ->find('foo', 'name');
+
+        $this->assertInternalType('object', $result);
+        $this->assertEquals('foo', $result->name);
+
+    }
+
+    /**
      * Reset the database
      * @return array $ids
      */

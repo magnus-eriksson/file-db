@@ -3,26 +3,26 @@
 class Filters
 {
     protected $operators = [
-        '='          => 'equal',
-        '==='        => 'equalStrict',
-        '!=='        => 'notEqualStrict',
-        '!='         => 'notEqual',
-        '<>'         => 'notEqual',
-        '<'          => 'lower',
-        '>'          => 'higher',
-        '<='         => 'lowerOrEqual',
-        '>='         => 'higherOrEqual',
-        '*'          => 'contains',
-        '=*'         => 'startsWith',
-        '*='         => 'endsWith',
-        'in'         => 'inList',
-        '!in'        => 'notInList',
-        'regex'      => 'regex',
-        'func'       => 'callback',
-        'array_has'  => 'arrayHas',
-        '!array_has' => 'arrayHasNot',
-        'has_col'    => 'hasColumn',
-        '!has_col'   => 'hasNotColumn',
+        '='          => 'testEqual',
+        '==='        => 'testEqualStrict',
+        '!=='        => 'testNotEqualStrict',
+        '!='         => 'testNotEqual',
+        '<>'         => 'testNotEqual',
+        '<'          => 'testLower',
+        '>'          => 'testHigher',
+        '<='         => 'testLowerOrEqual',
+        '>='         => 'testHigherOrEqual',
+        '*'          => 'testContains',
+        '=*'         => 'testStartsWith',
+        '*='         => 'testEndsWith',
+        'in'         => 'testInList',
+        '!in'        => 'testNotInList',
+        'regex'      => 'testRegex',
+        'func'       => 'testCallback',
+        'array_has'  => 'testArrayHas',
+        '!array_has' => 'testArrayHasNot',
+        'has_col'    => 'testHasColumn',
+        '!has_col'   => 'testHasNotColumn',
     ];
 
     public function match($op, $found, $real, $test)
@@ -31,13 +31,14 @@ class Filters
             return false;
         }
 
-        $testName = "test{$this->operators[$op]}";
-
-        if (!method_exists($this, $testName)) {
+        if (!method_exists($this, $this->operators[$op])) {
             return false;
         }
 
-        return call_user_func_array([$this, $testName], [$found, $real, $test]);
+        return call_user_func_array(
+            [$this, $this->operators[$op]],
+            [$found, $real, $test]
+        );
     }
 
     public function testEqual($found, $real, $test)
