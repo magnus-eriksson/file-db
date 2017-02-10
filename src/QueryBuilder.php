@@ -23,6 +23,11 @@ class QueryBuilder
      */
     protected $returnAs = 'array';
 
+    /**
+     * @var array
+     */
+    protected $order = [null, 'asc'];
+
 
     /**
      * @param Table $table
@@ -163,6 +168,21 @@ class QueryBuilder
 
 
     /**
+     * Set sort column and order
+     *
+     * @param  string $column
+     * @param  string $order    Either 'asc' or 'desc'
+     * @return $this
+     */
+    public function orderBy($column, $order = 'asc')
+    {
+        $this->order[0] = $column;
+        $this->order[1] = strtolower($order) == 'desc' ? 'desc' : 'asc';
+        return $this;
+    }
+
+
+    /**
      * Return results as object
      *
      * @param  string $class
@@ -186,7 +206,7 @@ class QueryBuilder
     public function get()
     {
         $list = [];
-        foreach ($this->table->data['data'] as $rs) {
+        foreach ($this->getData() as &$rs) {
             if (!$this->where) {
                 $list[] = $this->convertItem($rs);
                 continue;
@@ -219,13 +239,15 @@ class QueryBuilder
      */
     public function first()
     {
+        $data = $this->getData();
+
         if (!$this->where) {
-            return $this->data['data']
-                ? $this->convertItem(reset($this->data['data']))
+            return $data
+                ? $this->convertItem(reset($data))
                 : null;
         }
 
-        foreach ($this->table->data['data'] as $rs) {
+        foreach ($data as &$rs) {
             if ($this->matchWhere($rs)) {
                 return $this->convertItem($rs);
             }
@@ -382,6 +404,48 @@ class QueryBuilder
 
 
     /**
+     * Order the table
+     *
+     * @param  array $data
+     * @return array
+     */
+    protected function getData()
+    {
+        if (is_null($this->order[0])) {
+            return $this->table->data['data'];
+        }
+
+        $items  = $this->table->data['data'];
+        $col    = $this->order[0];
+        $order  = $this->order[1];
+
+        usort($items, function ($a, $b) use ($col, $order) {
+            if (!isset($a[$col]) && !isset($b[$col])) {
+                return 0;
+            }
+
+            if (is_array($a[$col]) || is_array($b[$col])) {
+                return 0;
+            }
+
+            if (!isset($a[$col]) || is_array($a[$col])) {
+                return $order == 'asc' ? -1 : 1;
+            }
+
+            if (!isset($b[$col]) || is_array($b[$col])) {
+                return $order == 'asc' ? 1 : -1;
+            }
+
+            return $order == 'asc'
+                ? strnatcmp((string) $a[$col], (string) $b[$col])
+                : strnatcmp((string) $b[$col], (string) $a[$col]);
+        });
+
+        return $items;
+    }
+
+
+    /**
      * Convert a record set
      *
      * @param  array $rs
@@ -408,7 +472,6 @@ class QueryBuilder
      */
     protected function matchWhere($rs)
     {
-
         foreach ($this->where as $where) {
             list($key, $op, $test) = $where;
             $found = array_key_exists($key, $rs);

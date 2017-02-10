@@ -1,5 +1,7 @@
 <?php namespace Maer\FileDB\Storage;
 
+use Exception;
+
 class FileSystem extends AbstractStorage
 {
     protected $path;
@@ -19,7 +21,16 @@ class FileSystem extends AbstractStorage
     {
         $file = $this->path . '/' . $table . '.json';
         if (is_file($file)) {
-            return json_decode(file_get_contents($file), true, 512);
+            $data = file_get_contents($file);
+            if (!$data) {
+                return $this->blankTable();
+            }
+
+            if (!$data = @json_decode($data, true, 512)) {
+                throw new Exception("Unable to parse table file '{$table}.json'");
+            }
+
+            return  $data;
         }
 
         return $this->blankTable();

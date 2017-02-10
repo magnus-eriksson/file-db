@@ -251,7 +251,109 @@ class QueryBuilderTest extends TestCase
 
         $this->assertInternalType('object', $result);
         $this->assertEquals('foo', $result->name);
+    }
 
+
+    /**
+    * @covers ::orderBy
+    */
+    public function testOrderByAsc()
+    {
+        db('test')->truncate();
+        db('test')->batchInsert([
+            [
+                'name'  => 'third',
+                'sort'  => 3,
+                'sort2' => ['test'],
+            ],
+            [
+                'name'  => 'first',
+                'sort'  => 1,
+                'sort2' => ['test'],
+            ],
+            [
+                'name'  => 'fourth',
+                'sort'  => 4,
+                'sort2' => 999,
+            ],
+            [
+                'name'  => 'second',
+                'sort'  => 2,
+                'sort2' => ['test'],
+            ],
+        ]);
+
+        $result = db('test')
+            ->orderBy('sort', 'asc')
+            ->get();
+
+        $this->assertEquals('first', $result[0]['name']);
+        $this->assertEquals('fourth', $result[3]['name']);
+
+        $result = db('test')
+            ->orderBy('name')
+            ->get();
+
+        $this->assertEquals('first', $result[0]['name']);
+        $this->assertEquals('third', $result[3]['name']);
+
+        $result = db('test')
+            ->orderBy('sort2')
+            ->get();
+
+        $this->assertEquals('third', $result[0]['name']);
+        $this->assertEquals(4, count($result));
+    }
+
+    /**
+    * @covers ::orderBy
+    */
+    public function testOrderByDesc()
+    {
+        db('test')->truncate();
+        db('test')->batchInsert([
+            [
+                'name'  => 'third',
+                'sort'  => 3,
+                'sort2' => ['test'],
+            ],
+            [
+                'name'  => 'first',
+                'sort'  => 1,
+                'sort2' => ['test'],
+            ],
+            [
+                'name'  => 'fourth',
+                'sort'  => 4,
+                'sort2' => 999,
+            ],
+            [
+                'name'  => 'second',
+                'sort'  => 2,
+                'sort2' => ['test'],
+            ],
+        ]);
+
+        $result = db('test')
+            ->orderBy('sort', 'desc')
+            ->get();
+
+        $this->assertEquals('first', $result[3]['name']);
+        $this->assertEquals('fourth', $result[0]['name']);
+
+        $result = db('test')
+            ->orderBy('name', 'desc')
+            ->get();
+
+        $this->assertEquals('first', $result[3]['name']);
+        $this->assertEquals('third', $result[0]['name']);
+
+        $result = db('test')
+            ->orderBy('sort2', 'desc')
+            ->get();
+
+        $this->assertEquals('third', $result[0]['name']);
+        $this->assertEquals(4, count($result));
     }
 
     /**
