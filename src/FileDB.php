@@ -20,20 +20,25 @@ class FileDB
      */
     protected $filters;
 
+    /**
+     * @var array
+     */
+    protected $opt = [];
+
 
     /**
      * @param string $path
+     * @param array  $options
      */
-    public function __construct($storage)
+    public function __construct($storage, array $options = [])
     {
-        if (is_string($storage)) {
-            $this->storage = new Storage\FileSystem($storage);
-        } else if ($storage instanceof Storage\AbstractStorage) {
-            $this->storage = $storage;
-        } else {
+        $this->opt = $options;
+
+        if (!$storage instanceof Storage\AbstractStorage) {
             throw new Exception('Invalid storage. Must be a file path or an instance of AbstractStorage');
         }
 
+        $this->storage = $storage;
         $this->filters = new Filters;
     }
 

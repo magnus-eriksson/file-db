@@ -4,11 +4,28 @@ use Exception;
 
 class FileSystem extends AbstractStorage
 {
+    /**
+     * @var string
+     */
     protected $path;
 
-    public function __construct($path)
+    /**
+     * @var array
+     */
+    protected $opt = [
+        'json_options'  => 0,
+        'json_depth'    => 512,
+    ];
+
+
+    /**
+     * @param string $path
+     * @param array  $options
+     */
+    public function __construct($path, array $options = [])
     {
-        $this->path = $path;
+        $this->path     = $path;
+        $this->opt = array_merge($this->opt, $options);
     }
 
     /**
@@ -48,6 +65,14 @@ class FileSystem extends AbstractStorage
         $file = $this->path . '/' . $table . '.json';
         $data = $this->touchModified($data);
 
-        return file_put_contents($file, json_encode($data, JSON_PRETTY_PRINT)) > 0;
+        $opt  = is_numeric($this->opt['json_options'])
+            ? $this->opt['json_options']
+            : 0;
+
+        $dept = is_numeric($this->opt['json_depth'])
+            ? $this->opt['json_depth']
+            : 512;
+
+        return file_put_contents($file, json_encode($data, $opt, $dept), LOCK_EX) > 0;
     }
 }
