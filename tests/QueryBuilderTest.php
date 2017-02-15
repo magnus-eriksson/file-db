@@ -1,7 +1,6 @@
 <?php
 use PHPUnit\Framework\TestCase;
 
-
 /**
  * @coversDefaultClass Maer\FileDB\Filters
  */

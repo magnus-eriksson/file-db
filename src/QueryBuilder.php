@@ -1,5 +1,7 @@
 <?php namespace Maer\FileDB;
 
+use Exception;
+
 class QueryBuilder
 {
     /**
@@ -59,7 +61,14 @@ class QueryBuilder
      */
     public function insert(array $data)
     {
-        $data = ['id' => $this->generateId()] + $data;
+        if (isset($data['id'])) {
+            if (array_key_exists($data['id'], $this->table->data['data'])) {
+                return null;
+            }
+        } else {
+            $data = ['id' => $this->generateId()] + $data;
+        }
+
         $this->table->data['data'][$data['id']] = $data;
         $this->table->save();
 
@@ -77,6 +86,14 @@ class QueryBuilder
     {
         $ids = [];
         foreach ($data as $item) {
+            if (isset($item['id'])) {
+                if (array_key_exists($item['id'], $this->table->data['data'])) {
+                    continue;
+                }
+            } else {
+                $item = ['id' => $this->generateId()] + $item;
+            }
+
             $ids[] = $this->insert($item);
         }
 
