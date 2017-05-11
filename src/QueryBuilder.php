@@ -12,7 +12,7 @@ class QueryBuilder
     /**
      * @var array
      */
-    protected $where;
+    protected $where = [];
 
     /**
      * @var Filters
@@ -283,7 +283,6 @@ class QueryBuilder
      */
     public function find($id, $column = 'id')
     {
-        $this->where = [];
         $this->where($column, $id);
 
         return $this->first();
