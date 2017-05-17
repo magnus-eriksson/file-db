@@ -30,6 +30,16 @@ class QueryBuilder
      */
     protected $order = [null, 'asc'];
 
+    /**
+     * @var integer
+     */
+    protected $limit;
+
+    /**
+     * @var integer
+     */
+    protected $offset;
+
 
     /**
      * @param Table $table
@@ -222,15 +232,31 @@ class QueryBuilder
      */
     public function get()
     {
-        $list = [];
+        $list      = [];
+        $i         = 0;
+        $realLimit = $this->offset && $this->limit
+            ? $this->offset + $this->limit
+            : $this->limit;
+
         foreach ($this->getData() as &$rs) {
+            if ($this->offset && $this->offset > $i) {
+                $i++;
+                continue;
+            }
+
+            if ($realLimit && $realLimit == $i) {
+                break;
+            }
+
             if (!$this->where) {
                 $list[] = $this->convertItem($rs);
+                $i++;
                 continue;
             }
 
             if ($this->matchWhere($rs)) {
                 $list[] = $this->convertItem($rs);
+                $i++;
             }
         }
 
@@ -286,6 +312,42 @@ class QueryBuilder
         $this->where($column, $id);
 
         return $this->first();
+    }
+
+
+    /**
+     * Limit the result
+     *
+     * @param  integer $limit
+     * @return $this
+     */
+    public function limit($limit)
+    {
+        if (intval($limit) != $limit) {
+            throw new \Exception('The limit must be an integer');
+        }
+
+        $this->limit = (int) $limit;
+
+        return $this;
+    }
+
+
+    /**
+     * Offset the result
+     *
+     * @param  integer $offset
+     * @return $this
+     */
+    public function offset($offset)
+    {
+        if (intval($offset) != $offset) {
+            throw new \Exception('The offset must be an integer');
+        }
+
+        $this->offset = (int) $offset;
+
+        return $this;
     }
 
 
