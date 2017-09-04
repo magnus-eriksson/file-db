@@ -2,23 +2,23 @@
 
 [![Build Status](https://api.travis-ci.org/magnus-eriksson/file-db.svg?branch=master)](https://travis-ci.org/magnus-eriksson/file-db)
 
-* [Install](#Install)
-* [Instantiate](#Instantiate)
-* [Storage drivers](#Storage_drivers)
-    * [File system](#File_system)
-    * [Memory](#Memory)
-* [Query builder](#Query_builder)
-    * [Tables](#Tables)
-    * [Insert](#Insert)
-        * [Batch insert](#Batch_insert)
-    * [Get data](#Get_data)
-        * [Get all items](#Get_all_items)
-        * [Get first item](#Get_first_item)
-        * [Where](#Where)
-        * [Order by](#Order_by)
-        * [Limit](#Limit)
-        * [Offset](#Offset)
-    * [Update](#Update)
+* [Install](#install)
+* [Instantiate](#instantiate)
+* [Storage drivers](#storage-drivers)
+    * [File system](#file-system)
+    * [Memory](#memory)
+* [Query builder](#query-builder)
+    * [Tables](#tables)
+    * [Insert](#insert)
+        * [Batch insert](#batch-insert)
+    * [Get data](#get-data)
+        * [Get all items](#get-all-items)
+        * [Get first item](#get-first-item)
+        * [Where](#where)
+        * [Order by](#order-by)
+        * [Limit](#limit)
+        * [Offset](#offset)
+    * [Update](#update)
 
 
 ## Install
@@ -29,7 +29,7 @@ Using composer:
 
 ## Instantiate
 
-To create an instance, you need to pass which [storage driver](#Storage_drivers) you want to use:
+To create an instance, you need to pass which [storage driver](#storage-drivers) you want to use:
 
     $driver = new SomeStorageDriver();
 
@@ -63,7 +63,7 @@ The memory driver only stores the data in memory for the current request and wil
 
 You can have as many tables (or rather collections) as you want. Each table will be stored in it's own file.
 
-When you get a table from the File DB, you're actually getting a new instance of the [Query builder](#Query_builder) (`Maer\FileDB\QueryBuilder`) so you can start building your query:
+When you get a table from the File DB, you're actually getting a new instance of the [Query builder](#query-builder) (`Maer\FileDB\QueryBuilder`) so you can start building your query:
 
     $query = $db->table('people');
 
