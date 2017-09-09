@@ -2,6 +2,10 @@
 
 [![Build Status](https://api.travis-ci.org/magnus-eriksson/file-db.svg?branch=master)](https://travis-ci.org/magnus-eriksson/file-db)
 
+This library makes it possible to store and retrieve data sets in your application without the need of databases. The data is stored in your file system as json files and can be retrieved through an easy to use query builder.
+
+> This is not meant to replace databases in high performance applications, but rather a convenient way of storing, filtering and retrieving smaller data sets.
+
 * [Install](#install)
 * [Instantiate](#instantiate)
 * [Storage drivers](#storage-drivers)
@@ -14,11 +18,16 @@
     * [Get data](#get-data)
         * [Get all items](#get-all-items)
         * [Get first item](#get-first-item)
+        * [Find](#find)
         * [Where](#where)
         * [Order by](#order-by)
         * [Limit](#limit)
         * [Offset](#offset)
+        * [As Object](#as-object)
     * [Update](#update)
+    * [Replace](#replace)
+    * [Delete](#delete)
+    * [Truncate](#truncate)
 
 
 ## Install
@@ -135,8 +144,19 @@ Return the first matched item.
 $row = $db->people->first();
 ```
 
-##### Where
+#### Find
 
+Get first item that matches a condition.
+
+```php
+// Find by ID (default)
+$row = $db->people->find('123');
+
+// Find by some other column
+$row = $db->people->find('Chuck', 'first_name');
+```
+
+##### Where
 
 Usually, you only want to return some specific items which match some type of criteria. You can do this by adding some "where" conditions to your query:
 
@@ -211,12 +231,27 @@ If you need to add an offset (for using with pagination, for example), you can u
 $results = $db->people->offset(2)->get();
 ```
 
+#### As Object
+
+By default, all items will be returned as associative arrays. If you rather have them returned as objects, you can use the method `asObj($class = 'stdClass')`:
+
+```php
+// Default, converts the item to a StdClass
+$item = $db->people->asObj()->first();
+
+// Using your own entity class
+$item => $db->people->asObj('Namespace\PersonClass')->find();
+
+```
+When passing a custom class, the item will be passed to the class in the constructor (as an array), so it's up to your custom class to populate it's properties accordingly.
+
+
 ### Update
 
 To update an item, use `update(array $data)`:
 
 ```php
-$success = $db->people
+$affected = $db->people
     ->where('first_name', 'Chuck')
     ->where('last_name', 'Norris')
     ->update([
@@ -224,4 +259,59 @@ $success = $db->people
     ]);
 ```
 
+This method returns the number of affected items.
+
+> Don't forget the `where`-clause or you will update _all_ items.
+
+### Replace
+
+The difference between this method and `update()` is that this replaces the complete item, except from the ID. Example:
+
+```php
+$id = $db->people->insert([
+    'foo'     => 'Lorem',
+    'bar'     => 'Ipsum',
+]);
+
+$affected = $db->people
+    ->where('id', $id)
+    ->replace([
+        'foo_bar' => 'Lorem Ipsum',
+    ]);
+
+$item = $db->people->find($id);
+// Returns:
+// [
+//     'id'      => 1234,
+//     'foo_bar' => 'Lorem Ipsum',
+// ]
+```
+
+This method returns the number of affected items.
+
+> Don't forget the `where`-clause or you will replace _all_ items.
+
+### Delete
+
+Delete items
+
+```php
+$affected = $db->people
+    ->where('first_name', 'Chuck')
+    ->delete();
+```
+
+This method returns the number of affected items.
+
+> Don't forget the `where`-clause or you will delete _all_ items.
+
+### Truncate
+
+Truncate a table. (Deletes all items)
+
+```php
+$success = $db->people->truncate();
+```
+
 This method returns a boolean. `true` on success and `false` on error.
+
