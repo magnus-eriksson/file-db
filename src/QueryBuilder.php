@@ -161,6 +161,19 @@ class QueryBuilder
 
 
     /**
+     * Insert a record or update if one exists:
+     *
+     * @param  array   $data
+     * @return integer $affectedRows
+     */
+    public function insertUpdate(array $data)
+    {
+        $affected = $this->update($data);
+        return $affected ?: $this->insert($data);
+    }
+
+
+    /**
      * Delete records
      *
      * @return integer $affectedRows
